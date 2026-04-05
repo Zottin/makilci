@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Makilci</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#f7f5f0;--surface:#ffffff;--surface2:#f0ede6;--border:#e4e0d8;
+--text:#1a1814;--text2:#6b6660;--text3:#9e9890;
+--accent:#2d6a4f;--accent2:#52b788;--accent3:#d8f3dc;
+--danger:#c44536;--warn:#e07a5f;--gold:#f4a261;
+--radius:16px;--radius-sm:10px;--radius-lg:24px;
+--shadow:0 2px 16px rgba(0,0,0,0.06);
+--font-head:'DM Serif Display',Georgia,serif;
+--font:'DM Sans',system-ui,sans-serif;
+}
+[data-theme="dark"]{
+--bg:#0f110e;--surface:#171a16;--surface2:#1e2219;--border:#2a2f27;
+--text:#e8e6e0;--text2:#9a9892;--text3:#6a6860;
+--accent:#52b788;--accent2:#74c69d;--accent3:#1b3a2b;
+--shadow:0 2px 16px rgba(0,0,0,0.3);
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--font);cursor:pointer;border:none;background:none}
+input,textarea,select{font-family:var(--font)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px}
+.nav-logo{font-family:var(--font-head);font-size:1.4rem;color:var(--accent)}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-link{font-size:.85rem;font-weight:500;color:var(--text2);padding:.4rem .8rem;border-radius:8px;transition:.2s;cursor:pointer}
+.nav-link:hover,.nav-link.active{color:var(--accent);background:var(--accent3)}
+.nav-actions{display:flex;gap:.75rem;align-items:center}
+.btn-ghost{font-size:.85rem;font-weight:500;color:var(--text2);padding:.4rem 1rem;border:1px solid var(--border);border-radius:8px;transition:.2s;cursor:pointer}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{font-size:.85rem;font-weight:600;color:#fff;background:var(--accent);padding:.45rem 1.1rem;border-radius:8px;transition:.2s;cursor:pointer}
+.btn-primary:hover{background:var(--accent2)}
+.theme-toggle{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:.2s;background:var(--surface2)}
+.theme-toggle:hover{border-color:var(--accent)}
+
+.page{display:none;min-height:calc(100vh - 60px);margin-top:60px;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.hero{padding:5rem 2rem 4rem;text-align:center;max-width:760px;margin:0 auto}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--accent3);color:var(--accent);font-size:.78rem;font-weight:600;padding:.35rem .9rem;border-radius:20px;margin-bottom:1.5rem;letter-spacing:.04em;text-transform:uppercase}
+.hero h1{font-family:var(--font-head);font-size:clamp(2.6rem,6vw,4.2rem);line-height:1.15;color:var(--text);margin-bottom:1.25rem}
+.hero h1 em{color:var(--accent);font-style:italic}
+.hero p{font-size:1.1rem;line-height:1.7;color:var(--text2);max-width:540px;margin:0 auto 2.5rem}
+.hero-cta{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.cta-primary{background:var(--accent);color:#fff;font-weight:600;font-size:1rem;padding:.85rem 2rem;border-radius:12px;transition:.25s;cursor:pointer}
+.cta-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.cta-secondary{background:var(--surface);color:var(--text);font-weight:500;font-size:1rem;padding:.85rem 2rem;border-radius:12px;border:1px solid var(--border);transition:.25s;cursor:pointer}
+.cta-secondary:hover{border-color:var(--accent);color:var(--accent)}
+
+.section{padding:3rem 2rem;max-width:1100px;margin:0 auto}
+.section-label{font-size:.78rem;font-weight:600;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.75rem}
+.section-title{font-family:var(--font-head);font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.2;margin-bottom:1rem}
+.section-sub{font-size:1rem;color:var(--text2);line-height:1.6;max-width:500px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;margin-top:2.5rem}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;transition:.25s;cursor:default}
+.feature-card:hover{border-color:var(--accent2);transform:translateY(-3px);box-shadow:var(--shadow)}
+.feature-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1.1rem}
+.feature-card h3{font-weight:600;font-size:1rem;margin-bottom:.5rem}
+.feature-card p{font-size:.88rem;color:var(--text2);line-height:1.6}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;background:var(--accent);border-radius:var(--radius-lg);padding:2.5rem;margin:2rem 0}
+.stat-item{text-align:center}
+.stat-num{font-family:var(--font-head);font-size:2.2rem;color:#fff}
+.stat-label{font-size:.82rem;color:rgba(255,255,255,.75);margin-top:.25rem}
+
+.dash-layout{display:grid;grid-template-columns:260px 1fr;gap:1.5rem;padding:1.5rem 2rem;max-width:1200px;margin:0 auto}
+@media(max-width:768px){.dash-layout{grid-template-columns:1fr}.sidebar{display:none}}
+.sidebar{display:flex;flex-direction:column;gap:1rem}
+.sidebar-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem}
+.sidebar-title{font-size:.78rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem}
+.mode-btn{width:100%;text-align:left;padding:.8rem 1rem;border-radius:10px;font-size:.9rem;font-weight:500;display:flex;align-items:center;gap:.75rem;transition:.2s;color:var(--text2);margin-bottom:.5rem}
+.mode-btn:hover{background:var(--surface2)}
+.mode-btn.active-mode{background:var(--accent3);color:var(--accent)}
+.streak-badge{background:linear-gradient(135deg,#f4a261,#e07a5f);color:#fff;border-radius:12px;padding:1rem;text-align:center;margin-bottom:.5rem}
+.streak-num{font-family:var(--font-head);font-size:2.4rem;color:#fff}
+.streak-label{font-size:.8rem;color:rgba(255,255,255,.85)}
+.dash-main{display:flex;flex-direction:column;gap:1.25rem}
+.dash-header{display:flex;align-items:center;justify-content:space-between}
+.dash-title{font-family:var(--font-head);font-size:1.6rem}
+.widget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.widget{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem}
+.widget-label{font-size:.78rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+.widget-val{font-family:var(--font-head);font-size:1.9rem;color:var(--text)}
+.widget-sub{font-size:.82rem;color:var(--text2);margin-top:.25rem}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.chart-title{font-weight:600;font-size:.95rem;margin-bottom:1.25rem}
+
+.shield-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.shield-active{background:linear-gradient(135deg,#1b2838,#2d3f57);border-color:#3d5a80;border-radius:var(--radius)}
+.shield-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.shield-title{color:#e8f4f8;font-weight:600;font-size:1rem;display:flex;align-items:center;gap:.5rem}
+.shield-indicator{width:8px;height:8px;border-radius:50%;background:#52b788;box-shadow:0 0 8px #52b788}
+.shield-status{font-size:.82rem;color:#9fbccf;margin-bottom:1.25rem}
+.toggle-track{width:48px;height:26px;border-radius:13px;background:#3d5a80;position:relative;cursor:pointer;transition:.3s}
+.toggle-track.on{background:#52b788}
+.toggle-thumb{width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:.3s}
+.toggle-track.on .toggle-thumb{left:25px}
+.blocked-list{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}
+.blocked-tag{background:rgba(196,69,54,.15);color:#e07a5f;border:1px solid rgba(196,69,54,.3);border-radius:6px;padding:.25rem .65rem;font-size:.78rem}
+.override-section{background:rgba(255,255,255,.04);border-radius:10px;padding:1rem;margin-top:1rem}
+.override-title{color:#9fbccf;font-size:.82rem;font-weight:500;margin-bottom:.75rem}
+.timer-display{font-family:var(--font-head);font-size:2.5rem;color:#52b788;text-align:center;margin:.5rem 0}
+.override-btn{width:100%;background:rgba(82,183,136,.15);color:#52b788;border:1px solid rgba(82,183,136,.3);border-radius:8px;padding:.65rem;font-size:.88rem;font-weight:500;cursor:pointer;margin-top:.75rem;transition:.2s}
+.override-btn:hover{background:rgba(82,183,136,.25)}
+.override-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.65rem;font-size:.88rem;color:#e8f4f8;margin-top:.5rem;outline:none}
+
+.flow-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.progress-track{background:var(--surface2);border-radius:10px;height:10px;overflow:hidden;margin:.5rem 0}
+.progress-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .6s ease}
+.flow-day{display:flex;align-items:center;gap:1rem;padding:.75rem 0;border-bottom:1px solid var(--border)}
+.flow-day:last-child{border-bottom:none}
+.day-label{font-size:.82rem;font-weight:500;width:60px;color:var(--text2)}
+.day-bar{flex:1}
+.day-limit{font-size:.78rem;color:var(--accent);width:50px;text-align:right}
+.range-input{width:100%;accent-color:var(--accent)}
+
+.mind-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;padding:1.5rem 2rem;max-width:1100px;margin:0 auto}
+.mind-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:.25s;cursor:pointer}
+.mind-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.mind-card-img{height:160px;display:flex;align-items:center;justify-content:center;font-size:4rem}
+.mind-card-body{padding:1.25rem}
+.mind-tag{font-size:.72rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+.mind-card h3{font-weight:600;font-size:.95rem;margin-bottom:.5rem;line-height:1.4}
+.mind-card p{font-size:.85rem;color:var(--text2);line-height:1.5}
+.refresh-btn{display:flex;align-items:center;gap:.5rem;background:var(--accent3);color:var(--accent);border:none;border-radius:10px;padding:.65rem 1.2rem;font-size:.88rem;font-weight:600;cursor:pointer;margin:0 auto 1.5rem;transition:.2s}
+.refresh-btn:hover{background:var(--accent2);color:#fff}
+
+.trust-panel{max-width:640px;margin:0 auto;padding:1.5rem 2rem}
+.trust-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem}
+.privacy-badge{display:flex;align-items:center;gap:.5rem;background:var(--accent3);color:var(--accent);border-radius:8px;padding:.65rem 1rem;font-size:.85rem;font-weight:500;margin-bottom:1.25rem}
+.form-group{margin-bottom:1rem}
+.form-label{font-size:.82rem;font-weight:600;color:var(--text2);margin-bottom:.4rem;display:block}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.7rem .9rem;font-size:.9rem;color:var(--text);outline:none;transition:.2s}
+.form-input:focus{border-color:var(--accent)}
+.submit-btn{width:100%;background:var(--accent);color:#fff;border-radius:10px;padding:.85rem;font-size:.95rem;font-weight:600;cursor:pointer;transition:.2s}
+.submit-btn:hover{background:var(--accent2)}
+.weekly-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
+.sum-item{background:var(--surface2);border-radius:10px;padding:1rem;text-align:center}
+.sum-val{font-family:var(--font-head);font-size:1.6rem;color:var(--accent)}
+.sum-label{font-size:.78rem;color:var(--text2);margin-top:.2rem}
+
+.about-hero{text-align:center;padding:4rem 2rem 3rem;max-width:700px;margin:0 auto}
+.about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;max-width:1000px;margin:0 auto;padding:0 2rem 3rem}
+.about-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.about-icon{font-size:2rem;margin-bottom:1rem}
+.about-card h3{font-weight:600;margin-bottom:.5rem}
+.about-card p{font-size:.88rem;color:var(--text2);line-height:1.6}
+.values-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;max-width:900px;margin:0 auto;padding:0 2rem 3rem}
+.value-chip{background:var(--accent3);border-radius:12px;padding:1.25rem;text-align:center}
+.value-chip span{display:block;font-size:1.5rem;margin-bottom:.5rem}
+.value-chip p{font-size:.88rem;font-weight:600;color:var(--accent)}
+
+.contact-layout{display:grid;grid-template-columns:1fr 1.5fr;gap:2rem;max-width:900px;margin:0 auto;padding:2rem}
+@media(max-width:680px){.contact-layout{grid-template-columns:1fr}}
+.contact-info h2{font-family:var(--font-head);font-size:1.8rem;margin-bottom:.75rem}
+.contact-info p{font-size:.9rem;color:var(--text2);line-height:1.6;margin-bottom:1.5rem}
+.contact-detail{display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--border);font-size:.88rem}
+.contact-detail:last-child{border-bottom:none}
+.social-row{display:flex;gap:.75rem;margin-top:1.5rem}
+.social-btn{width:36px;height:36px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;transition:.2s}
+.social-btn:hover{border-color:var(--accent);background:var(--accent3)}
+.contact-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem}
+.form-textarea{resize:vertical;min-height:120px}
+.success-popup{display:none;position:fixed;top:80px;right:1.5rem;background:var(--accent);color:#fff;border-radius:14px;padding:1rem 1.5rem;font-weight:500;font-size:.9rem;z-index:200;box-shadow:0 4px 24px rgba(0,0,0,.15);animation:slideIn .4s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+.success-popup.show{display:block}
+
+.auth-layout{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 60px);padding:2rem}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:400px}
+.auth-title{font-family:var(--font-head);font-size:2rem;text-align:center;margin-bottom:.5rem}
+.auth-sub{font-size:.88rem;color:var(--text2);text-align:center;margin-bottom:2rem}
+.auth-tabs{display:flex;gap:0;background:var(--surface2);border-radius:10px;padding:3px;margin-bottom:1.75rem}
+.auth-tab{flex:1;text-align:center;padding:.55rem;border-radius:8px;font-size:.88rem;font-weight:500;color:var(--text2);cursor:pointer;transition:.2s}
+.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.divider{display:flex;align-items:center;gap:1rem;margin:1rem 0;color:var(--text3);font-size:.82rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.oauth-btn{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.75rem;font-size:.9rem;font-weight:500;display:flex;align-items:center;justify-content:center;gap:.75rem;cursor:pointer;transition:.2s;margin-bottom:.75rem}
+.oauth-btn:hover{border-color:var(--accent)}
+
+.notif-popup{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;max-width:300px;z-index:150;box-shadow:var(--shadow);display:none;animation:bounceIn .4s ease}
+.notif-popup.show{display:block}
+@keyframes bounceIn{from{opacity:0;transform:scale(.9) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.notif-close{position:absolute;top:.75rem;right:.75rem;cursor:pointer;color:var(--text3);font-size:1rem}
+.notif-icon{font-size:1.5rem;margin-bottom:.5rem}
+.notif-title{font-weight:600;font-size:.9rem;margin-bottom:.35rem}
+.notif-msg{font-size:.82rem;color:var(--text2);line-height:1.5}
+
+footer{background:var(--surface);border-top:1px solid var(--border);padding:2rem;text-align:center;font-size:.85rem;color:var(--text3);margin-top:3rem}
+footer strong{color:var(--accent)}
+@media(max-width:600px){.nav-links{display:none}.hero h1{font-size:2.2rem}}
+</style>
+</head>
+<body>
+
+<div class="notif-popup" id="notifPopup">
+  <span class="notif-close" onclick="closeNotif()">✕</span>
+  <div class="notif-icon" id="notifIcon">🌿</div>
+  <div class="notif-title" id="notifTitle">Time to breathe</div>
+  <div class="notif-msg" id="notifMsg">Take 3 deep breaths. You're doing better than you think.</div>
+</div>
+
+<div class="success-popup" id="successPopup">✓ Message sent! We'll get back to you shortly.</div>
+
+<nav>
+  <div class="nav-logo">🌿 Makilci</div>
+  <div class="nav-links">
+    <span class="nav-link active" onclick="showPage('landing',this)">Home</span>
+    <span class="nav-link" onclick="showPage('dashboard',this)">Dashboard</span>
+    <span class="nav-link" onclick="showPage('mindboost',this)">Mind Boost</span>
+    <span class="nav-link" onclick="showPage('about',this)">About</span>
+    <span class="nav-link" onclick="showPage('contact',this)">Contact</span>
+  </div>
+  <div class="nav-actions">
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button class="btn-ghost" onclick="showPage('auth',document.querySelector('.nav-link'))">Sign in</button>
+    <button class="btn-primary" onclick="showPage('auth',document.querySelector('.nav-link'))">Get Started</button>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div class="page active" id="page-landing">
+  <div class="hero">
+    <div class="hero-badge">🛡️ Break Artificial Pleasure. Build Real Life.</div>
+    <h1>Reclaim your mind.<br>Build <em>real freedom</em>.</h1>
+    <p>Makilci uses behavioral science and smart blocking to help you break free from digital addiction — one intentional day at a time.</p>
+    <div class="hero-cta">
+      <button class="cta-primary" onclick="showPage('dashboard',document.querySelectorAll('.nav-link')[1])">Start Your Journey</button>
+      <button class="cta-secondary" onclick="showPage('about',document.querySelectorAll('.nav-link')[3])">Learn More</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Core System</div>
+    <div class="section-title">Everything you need to<br>rebuild discipline</div>
+    <div class="section-sub">Six integrated tools powered by behavioral psychology, not willpower alone.</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#1b2838;font-size:1.2rem">🛡️</div>
+        <h3>Shield Mode</h3>
+        <p>Cold-turkey blocking with delay overrides. No instant disable — only intentional access.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--accent3)">🌊</div>
+        <h3>Flow Mode</h3>
+        <p>Gradual tapering system. Set daily limits that reduce week-over-week with visual progress.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fef3e2">💡</div>
+        <h3>Mind Boost Engine</h3>
+        <p>Healthy replacement content — nature, motivation, and micro-tasks to redirect your focus.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#f0f9ff">⚡</div>
+        <h3>Focus Signals</h3>
+        <p>Smart notifications during risky periods. Positive, actionable nudges at the right moment.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#f5f0ff">🤝</div>
+        <h3>Trust Circle</h3>
+        <p>Optional accountability partner system. Privacy-first weekly progress summaries.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fff0f5">📈</div>
+        <h3>Growth Dashboard</h3>
+        <p>Streaks, usage reduction graphs, and weekly/monthly stats. Watch your progress compound.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-num">84%</div><div class="stat-label"> Realtime prediction users reduce addiction in week 1</div></div>
+      <div class="stat-item"><div class="stat-num">21 days</div><div class="stat-label">Avg. time to form new habit</div></div>
+      <div class="stat-item"><div class="stat-num">4.9★</div><div class="stat-label">Success rate</div></div>
+    </div>
+  </div>
+
+  <footer><strong>Makilci</strong> — Digital Discipline & Wellness System · 2026· All rights reserved</footer>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page" id="page-dashboard">
+  <div class="dash-layout">
+    <div class="sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-title">Mode</div>
+        <button class="mode-btn active-mode" id="modeShield" onclick="setMode('shield')">🛡️ Shield Mode</button>
+        <button class="mode-btn" id="modeFlow" onclick="setMode('flow')">🌊 Flow Mode</button>
+        <button class="mode-btn" id="modeTrust" onclick="setMode('trust')">🤝 Trust Circle</button>
+      </div>
+      <div class="sidebar-card" style="text-align:center">
+        <div class="streak-badge">
+          <div class="streak-num" id="streakNum">7</div>
+          <div class="streak-label">Day Streak 🔥</div>
+        </div>
+        <p style="font-size:.82rem;color:var(--text2);margin-top:.75rem">Keep going! 3 more days to your record.</p>
+      </div>
+      <div class="sidebar-card">
+        <div class="sidebar-title">Today</div>
+        <div style="margin-bottom:.75rem">
+          <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.4rem">
+            <span style="color:var(--text2)">Time saved</span><span style="font-weight:600;color:var(--accent)">1h 42m</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:68%"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.4rem">
+            <span style="color:var(--text2)">Blocks triggered</span><span style="font-weight:600">12</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:40%;background:linear-gradient(90deg,#e07a5f,#f4a261)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-main">
+      <div class="dash-header">
+        <div class="dash-title">Good morning 👋 Sekul</div>
+        <div id="currentDate" style="font-size:.85rem;color:var(--text2)"></div>
+      </div>
+
+      <div class="widget-grid">
+        <div class="widget">
+          <div class="widget-label">Weekly Reduction</div>
+          <div class="widget-val" style="color:var(--accent)">↓ 34%</div>
+          <div class="widget-sub">vs last week</div>
+        </div>
+        <div class="widget">
+          <div class="widget-label">Blocks Today</div>
+          <div class="widget-val">12</div>
+          <div class="widget-sub">3 override attempts</div>
+        </div>
+        <div class="widget">
+          <div class="widget-label">Focus Time</div>
+          <div class="widget-val">4h 20m</div>
+          <div class="widget-sub">personal best</div>
+        </div>
+        <div class="widget">
+          <div class="widget-label">Mood Score</div>
+          <div class="widget-val" style="color:#f4a261">8.2</div>
+          <div class="widget-sub">+1.4 from last week</div>
+        </div>
+      </div>
+
+      <div id="shieldPanel">
+        <div class="shield-panel shield-active">
+          <div class="shield-header">
+            <div class="shield-title">
+              <div class="shield-indicator"></div>
+              Shield Mode Active
+            </div>
+            <div class="toggle-track on" id="shieldToggle" onclick="toggleShield()">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+          <div class="shield-status">🔒 Blocking is active. No instant disable available.</div>
+          <div style="color:#9fbccf;font-size:.82rem;margin-bottom:.5rem">Currently blocked:</div>
+          <div class="blocked-list">
+            <span class="blocked-tag">site-a.com</span>
+            <span class="blocked-tag">site-b.com</span>
+            <span class="blocked-tag">site-c.com</span>
+            <span class="blocked-tag">+14 more</span>
+          </div>
+          <div class="override-section">
+            <div class="override-title">⏳ Emergency Override (30-sec delay)</div>
+            <div id="overrideSection">
+              <input class="override-input" id="reasonInput" placeholder="Why do you need access? (required)">
+              <button class="override-btn" onclick="startOverride()">Request Override →</button>
+            </div>
+            <div id="timerSection" style="display:none;text-align:center">
+              <div class="timer-display" id="timerDisplay">0:30</div>
+              <div style="color:#9fbccf;font-size:.82rem">Reflect on your reason. Timer must complete.</div>
+              <button class="override-btn" id="cancelOverrideBtn" onclick="cancelOverride()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="flowPanel" style="display:none">
+        <div class="flow-panel">
+          <div style="font-weight:600;font-size:.95rem;margin-bottom:.5rem">🌊 Flow Mode — Weekly Tapering Plan</div>
+          <div style="font-size:.85rem;color:var(--text2);margin-bottom:1.25rem">Set your daily time limit. It reduces by 15% each week automatically.</div>
+          <div id="flowDays"></div>
+          <div style="margin-top:1.25rem">
+            <div class="form-label">Weekly Goal Adjustment</div>
+            <input type="range" class="range-input" min="30" max="180" value="90" id="flowSlider" oninput="updateFlowSlider()">
+            <div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--text2);margin-top:.25rem">
+              <span>30 min</span><span id="flowSliderVal" style="color:var(--accent);font-weight:600">90 min/day</span><span>3 hrs</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="trustPanel" style="display:none">
+        <div>
+          <div class="trust-card">
+            <div class="privacy-badge">🔒 Privacy-first: your data is never shared without consent</div>
+            <div class="form-group">
+              <label class="form-label">Accountability Partner Email</label>
+              <input class="form-input" type="email" placeholder="friend@example.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Send frequency</label>
+              <select class="form-input">
+                <option>Weekly summary</option>
+                <option>Bi-weekly</option>
+                <option>Monthly</option>
+              </select>
+            </div>
+            <button class="submit-btn" onclick="alert('Partner added! Weekly summaries will be simulated.')">Add Partner</button>
+          </div>
+          <div class="trust-card">
+            <div style="font-weight:600;margin-bottom:1rem">📊 This Week's Summary</div>
+            <div class="weekly-summary">
+              <div class="sum-item"><div class="sum-val">7</div><div class="sum-label">Day streak</div></div>
+              <div class="sum-item"><div class="sum-val">↓34%</div><div class="sum-label">Usage drop</div></div>
+              <div class="sum-item"><div class="sum-val">12</div><div class="sum-label">Blocks held</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">📈 Usage Reduction — Last 30 Days</div>
+        <canvas id="usageChart" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MIND BOOST -->
+<div class="page" id="page-mindboost">
+  <div style="text-align:center;padding:3rem 2rem 1.5rem">
+    <div class="section-label">Mind Boost Engine</div>
+    <div class="section-title" style="max-width:520px;margin:.5rem auto 1rem">Redirect your focus</div>
+    <p style="color:var(--text2);font-size:.95rem;max-width:480px;margin:0 auto 1.5rem">Healthy content to replace urges — nature, motivation, and micro-tasks.</p>
+    <button class="refresh-btn" onclick="refreshMindCards()">↻ Refresh Feed</button>
+  </div>
+  <div class="mind-grid" id="mindGrid"></div>
+</div>
+
+<!-- ABOUT -->
+<div class="page" id="page-about">
+  <div class="about-hero">
+    <div class="section-label">Our Story</div>
+    <h1 class="section-title">Built from struggle.<br>Designed for freedom.</h1>
+    <p style="color:var(--text2);font-size:.95rem;line-height:1.7;margin-top:.75rem">Makilci was born from a real problem of porn addiction — the founders experienced firsthand how digital addiction quietly erodes focus, confidence, and connection. We combined behavioral psychology with modern technology to build a system that actually works.</p>
+  </div>
+
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="about-icon">🎯</div>
+      <h3>Our Mission</h3>
+      <p> <b>Break Artificial Pleasure. Build Real Life.</b>To help people worldwide reclaim control over their digital habits, attention, and ultimately — their lives. We believe technology should serve you, not the other way around.</p>
+    </div>
+    <div class="about-card">
+      <div class="about-icon">🔭</div>
+      <h3>Our Vision</h3>
+      <p>A future where every person has the tools to build a healthier relationship with technology — distraction-free, present, and fully alive to what matters most.</p>
+    </div>
+    <div class="about-card">
+      <div class="about-icon">📖</div>
+      <h3>Our Story</h3>
+      <p>Makilci started as a personal tool and grew into a platform. Today it serves users worldwide who are breaking free from digital cycles they never consciously chose.</p>
+    </div>
+    <div class="about-card">
+      <div class="about-icon">🔬</div>
+      <h3>Our Method</h3>
+      <p>We combine cold-turkey blocking with gradual tapering, behavioral triggers, and positive reinforcement — a complete system, not a single trick.</p>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:1rem 2rem 1.5rem">
+    <div class="section-label">Core Values</div>
+    <div class="section-title" style="font-size:1.8rem;margin-bottom:1.5rem">What we stand for</div>
+  </div>
+  <div class="values-row">
+    <div class="value-chip"><span>🔒</span><p>Privacy First</p></div>
+    <div class="value-chip"><span>💪</span><p>User Empowerment</p></div>
+    <div class="value-chip"><span>🌱</span><p>Sustainable Change</p></div>
+    <div class="value-chip"><span>🤝</span><p>Radical Honesty</p></div>
+  </div>
+
+  <footer><strong>Makilci</strong> — Digital Discipline & Wellness System · 2024</footer>
+</div>
+
+<!-- CONTACT -->
+<div class="page" id="page-contact">
+  <div style="text-align:center;padding:3rem 2rem 2rem">
+    <div class="section-label">Get in Touch</div>
+    <div class="section-title" style="font-size:2rem">We'd love to hear from you</div>
+  </div>
+  <div class="contact-layout">
+    <div class="contact-info">
+      <h2>Let's talk.</h2>
+      <p>Whether you have a question about features, need support, or want to share your story — our team is ready to help.</p>
+      <div class="contact-detail">📧 <span>support@makilci.com</span></div>
+      <div class="contact-detail">📞 <span>+1 (800) 555-MAKI</span></div>
+      <div class="contact-detail">📍 <span>Remote-first team</span></div>
+      <div class="contact-detail">⏰ <span>Mon–Fri, 9am–6pm PST</span></div>
+      <div class="social-row">
+        <div class="social-btn" title="Twitter">𝕏</div>
+        <div class="social-btn" title="Instagram">📷</div>
+        <div class="social-btn" title="LinkedIn">in</div>
+        <div class="social-btn" title="YouTube">▶</div>
+      </div>
+    </div>
+    <div class="contact-form">
+      <div class="form-group">
+        <label class="form-label">Your Name *</label>
+        <input class="form-input" id="cName" type="text" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input class="form-input" id="cEmail" type="email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <select class="form-input" id="cSubject">
+          <option>General Inquiry</option>
+          <option>Technical Support</option>
+          <option>Feature Request</option>
+          <option>Recovery Story</option>
+          <option>Partnership</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message *</label>
+        <textarea class="form-input form-textarea" id="cMsg" placeholder="Tell us what's on your mind..."></textarea>
+      </div>
+      <button class="submit-btn" onclick="submitContact()">Send Message →</button>
+    </div>
+  </div>
+  <footer><strong>Makilci</strong> — Digital Discipline & Wellness System · 2024</footer>
+</div>
+
+<!-- AUTH -->
+<div class="page" id="page-auth">
+  <div class="auth-layout">
+    <div class="auth-card">
+      <div class="auth-title">🌿 Makilci</div>
+      <div class="auth-sub">Your journey to digital freedom starts here.</div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tabSignin" onclick="authTab('signin')">Sign In</div>
+        <div class="auth-tab" id="tabSignup" onclick="authTab('signup')">Sign Up</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" placeholder="you@example.com">
+      </div>
+      <div class="form-group" id="nameField" style="display:none">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" placeholder="••••••••">
+      </div>
+      <button class="submit-btn" id="authSubmit" onclick="doAuth()" style="margin-bottom:1rem">Sign In</button>
+      <div class="divider">or continue with</div>
+      <button class="oauth-btn">🔵 Continue with Google</button>
+      <button class="oauth-btn">⬛ Continue with Apple</button>
+      <p style="text-align:center;font-size:.8rem;color:var(--text3);margin-top:1rem">By continuing, you agree to our Terms of Service and Privacy Policy.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let darkMode=false,shieldOn=true,overrideTimer=null,overrideCount=30;
+const notifMessages=[
+  {icon:'🌿',title:'Breathe',msg:'Take 3 deep breaths. You\'re doing better than you think.'},
+  {icon:'💧',title:'Hydrate',msg:'Drink a glass of water. Small acts build momentum.'},
+  {icon:'🚶',title:'Move',msg:'Stand up and walk for 2 minutes. Your mind will thank you.'},
+  {icon:'✍️',title:'Journal',msg:'Write one sentence about how you want to feel today.'},
+  {icon:'🌅',title:'Perspective',msg:'Every moment is a fresh start. You\'re not your urges.'},
+  {icon:'🎯',title:'Check in',msg:'What\'s the most important thing you can do right now?'},
+];
+const mindData=[
+  {bg:'#d8f3dc',icon:'🌲',tag:'Nature',title:'Forest Bathing Micro-session',desc:'Close your eyes and imagine walking through a quiet forest. Feel the coolness. Hear the leaves rustle.'},
+  {bg:'#fef3e2',icon:'⚡',tag:'Motivation',title:'"Discipline is choosing between what you want now and what you want most."',desc:'Every block you hold is a vote for the person you\'re becoming.'},
+  {bg:'#f0f9ff',icon:'🧘',tag:'Micro-task',title:'Box Breathing (4-7-8)',desc:'Inhale 4 counts → Hold 7 → Exhale 8. Repeat 4 times. Scientifically proven to reduce cravings instantly.'},
+  {bg:'#e8f5e9',icon:'🌊',tag:'Nature',title:'Ocean Wave Visualization',desc:'Picture waves rolling in and out. Each wave carries your urge away. You are the shore — steady and unchanging.'},
+  { bg:'#fce4ec', icon:'🔥', tag:'Reel Boost For Travel', title:'Skip the urge. Swipe into a better you.', desc:'Watch, reset, and stay in control.' },
+  {bg:'#f3e5f5',icon:'✏️',tag:'Micro-task',title:'Gratitude Sprint',desc:'Name 3 things you\'re grateful for in under 30 seconds. Gratitude activates your rational mind.'},
+  {bg:'#e0f2f1',icon:'☀️',tag:'Nature',title:'Sunrise Visualization',desc:'Imagine a new dawn. Light spreading across a calm horizon. This day is yours to shape.'},
+  {bg:'#fff3e0',icon:'🏆',tag:'Motivation',title:'Remember your "why"',desc:'Why did you start this journey? Write it down. Let that reason be louder than the noise.'},
+  {bg:'#e8eaf6',icon:'🤸',tag:'Micro-task',title:'10 Jumping Jacks Now',desc:'Physical movement floods your brain with dopamine — naturally, sustainably, without regret.'},
+];
+
+function showPage(id,navEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
+  if(navEl) navEl.classList.add('active');
+  if(id==='dashboard') initDashboard();
+  if(id==='mindboost') initMindBoost();
+}
+function toggleTheme(){
+  darkMode=!darkMode;
+  document.documentElement.setAttribute('data-theme',darkMode?'dark':'');
+  document.getElementById('themeBtn').textContent=darkMode?'☀️':'🌙';
+  if(window.usageChartInst) window.usageChartInst.destroy();
+  if(document.getElementById('page-dashboard').classList.contains('active')) initChart();
+}
+function toggleShield(){
+  shieldOn=!shieldOn;
+  document.getElementById('shieldToggle').classList.toggle('on',shieldOn);
+}
+function startOverride(){
+  const reason=document.getElementById('reasonInput').value.trim();
+  if(!reason){alert('Please enter a reason before requesting an override.');return;}
+  document.getElementById('overrideSection').style.display='none';
+  document.getElementById('timerSection').style.display='block';
+  overrideCount=30;updateTimerDisplay();
+  overrideTimer=setInterval(()=>{
+    overrideCount--;updateTimerDisplay();
+    if(overrideCount<=0){
+      clearInterval(overrideTimer);
+      document.getElementById('timerDisplay').textContent='Override granted';
+      document.getElementById('cancelOverrideBtn').textContent='Close';
+    }
+  },1000);
+}
+function cancelOverride(){
+  clearInterval(overrideTimer);
+  document.getElementById('overrideSection').style.display='block';
+  document.getElementById('timerSection').style.display='none';
+  document.getElementById('timerDisplay').textContent='0:30';
+}
+function updateTimerDisplay(){
+  const s=overrideCount;
+  document.getElementById('timerDisplay').textContent='0:'+(s<10?'0'+s:s);
+}
+function setMode(mode){
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active-mode'));
+  document.getElementById('mode'+mode.charAt(0).toUpperCase()+mode.slice(1)).classList.add('active-mode');
+  document.getElementById('shieldPanel').style.display=mode==='shield'?'block':'none';
+  document.getElementById('flowPanel').style.display=mode==='flow'?'block':'none';
+  document.getElementById('trustPanel').style.display=mode==='trust'?'block':'none';
+  if(mode==='flow') renderFlowDays();
+}
+function renderFlowDays(){
+  const base=parseInt(document.getElementById('flowSlider').value)||90;
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const factors=[1,.9,.85,.8,.75,.7,.65];
+  const usedPct=[.6,.55,.7,.4,.5,.3,.2];
+  let html='';
+  days.forEach((d,i)=>{
+    const lim=Math.round(base*factors[i]);
+    const pct=Math.round(usedPct[i]*100);
+    html+=`<div class="flow-day"><div class="day-label">${d}</div><div class="day-bar"><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div></div><div class="day-limit">${lim}m</div></div>`;
+  });
+  document.getElementById('flowDays').innerHTML=html;
+}
+function updateFlowSlider(){
+  document.getElementById('flowSliderVal').textContent=document.getElementById('flowSlider').value+' min/day';
+  renderFlowDays();
+}
+function initDashboard(){setMode('shield');setTimeout(initChart,100);}
+function initChart(){
+  const canvas=document.getElementById('usageChart');
+  if(!canvas) return;
+  if(window.usageChartInst) window.usageChartInst.destroy();
+  window.usageChartInst=new Chart(canvas,{
+    type:'line',
+    data:{labels:['W1','W2','W3','W4','W5','W6','W7','W8'],datasets:[{label:'Daily avg (min)',data:[180,162,148,130,115,98,82,68],fill:true,borderColor:'#2d6a4f',backgroundColor:darkMode?'rgba(82,183,136,0.1)':'rgba(216,243,220,0.5)',tension:.4,pointBackgroundColor:'#52b788',pointRadius:4,borderWidth:2}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:darkMode?'#2a2f27':'#e4e0d8'},ticks:{color:darkMode?'#9a9892':'#6b6660',font:{size:12}}},y:{grid:{color:darkMode?'#2a2f27':'#e4e0d8'},ticks:{color:darkMode?'#9a9892':'#6b6660',font:{size:12}},min:0}}}
+  });
+}
+function initMindBoost(){renderMindCards();}
+function renderMindCards(){
+  const grid=document.getElementById('mindGrid');
+  grid.innerHTML='';
+  [...mindData].sort(()=>Math.random()-.5).forEach(card=>{
+    const div=document.createElement('div');
+    div.className='mind-card';
+    div.innerHTML=`<div class="mind-card-img" style="background:${card.bg}">${card.icon}</div><div class="mind-card-body"><div class="mind-tag">${card.tag}</div><h3>${card.title}</h3><p>${card.desc}</p></div>`;
+    grid.appendChild(div);
+  });
+}
+function refreshMindCards(){
+  const btn=document.querySelector('.refresh-btn');
+  btn.textContent='↻ Refreshing...';
+  setTimeout(()=>{renderMindCards();btn.textContent='↻ Refresh Feed';},600);
+}
+function submitContact(){
+  const n=document.getElementById('cName').value.trim();
+  const e=document.getElementById('cEmail').value.trim();
+  const m=document.getElementById('cMsg').value.trim();
+  if(!n){alert('Please enter your name.');return;}
+  if(!e||!e.includes('@')){alert('Please enter a valid email.');return;}
+  if(!m){alert('Please enter a message.');return;}
+  const popup=document.getElementById('successPopup');
+  popup.classList.add('show');
+  document.getElementById('cName').value='';
+  document.getElementById('cEmail').value='';
+  document.getElementById('cMsg').value='';
+  setTimeout(()=>popup.classList.remove('show'),4000);
+}
+function authTab(tab){
+  document.getElementById('tabSignin').classList.toggle('active',tab==='signin');
+  document.getElementById('tabSignup').classList.toggle('active',tab==='signup');
+  document.getElementById('nameField').style.display=tab==='signup'?'block':'none';
+  document.getElementById('authSubmit').textContent=tab==='signup'?'Create Account':'Sign In';
+}
+function doAuth(){showPage('dashboard',document.querySelectorAll('.nav-link')[1]);}
+function showNotif(){
+  const msg=notifMessages[Math.floor(Math.random()*notifMessages.length)];
+  document.getElementById('notifIcon').textContent=msg.icon;
+  document.getElementById('notifTitle').textContent=msg.title;
+  document.getElementById('notifMsg').textContent=msg.msg;
+  const popup=document.getElementById('notifPopup');
+  popup.classList.add('show');
+  setTimeout(()=>popup.classList.remove('show'),7000);
+}
+function closeNotif(){document.getElementById('notifPopup').classList.remove('show');}
+function scheduleNotif(){const d=(30+Math.random()*60)*1000;setTimeout(()=>{showNotif();scheduleNotif();},d);}
+scheduleNotif();
+initMindBoost();
+
+function updateDate() {
+  const now = new Date();
+
+  const options = {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric'
+  };
+
+  const formattedDate = now.toLocaleDateString('en-US', options);
+
+  document.getElementById('currentDate').textContent = formattedDate;
+}
+
+// Run once
+updateDate();
+
+// Optional: update every minute
+setInterval(updateDate, 60000);
+
+</script>
+</body>
+</html>
